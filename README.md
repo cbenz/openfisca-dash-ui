@@ -2,6 +2,10 @@
 
 UI for OpenFisca using [Python Dash](https://dash.plot.ly/).
 
+## View on Heroku
+
+https://openfisca-dash-ui.herokuapp.com/
+
 ## Install
 
 ```bash
