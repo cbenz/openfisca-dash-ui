@@ -1,2 +1,4 @@
 .pytest_cache
 .ipynb_checkpoints
+.eggs
+OpenFisca_Dash_UI.egg-info

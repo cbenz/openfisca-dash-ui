@@ -16,7 +16,13 @@ pip install -r requirements.txt
 ## Start server
 
 ```bash
-python app.py
+python scripts/start_server.py
 ```
 
 Open http://localhost:7777/
+
+## Testing
+
+```bash
+python setup.py test
+```
