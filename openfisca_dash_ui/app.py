@@ -104,13 +104,13 @@ def precalculate_decomposition_json(tbs):
     return filled_decomposition_json
 
 
-print("Initializing France tax and benefit system...")
-tbs = FranceTaxBenefitSystem()
-print("Pre-calculating waterfall data...")
-decomposition_json = precalculate_decomposition_json(tbs)
+# print("Initializing France tax and benefit system...")
+# tbs = FranceTaxBenefitSystem()
+# print("Pre-calculating waterfall data...")
+# decomposition_json = precalculate_decomposition_json(tbs)
 
-# with Path("decomposition.json").open() as fd:
-#     decomposition_json = json.load(fd)
+with Path("decomposition.json").open() as fd:
+    decomposition_json = json.load(fd)
 
 waterfall_columns = decomposition_to_waterfall(decomposition_json)
 
@@ -134,10 +134,11 @@ app.layout = html.Div(children=[
         updatemode='drag',
     ),
 
-    dcc.Graph(
-        id='waterfall',
-        figure=create_waterfall_figure(
-            keep_index(value_to_index(MIN, STEP, INITIAL_VALUE), waterfall_columns))
+    dcc.Graph(id='waterfall'),
+    dcc.Checklist(
+        id='chart-options',
+        options=[{'label': 'Display sub-totals', 'value': 'display-sub-totals'}],
+        values=[]
     ),
 ])
 
@@ -147,7 +148,13 @@ def display_salaire_de_base(salaire_de_base):
     return salaire_de_base
 
 
-@app.callback(Output('waterfall', 'figure'), [Input('salaire-de-base', 'value')])
-def update_waterfall(salaire_de_base):
+@app.callback(Output('waterfall', 'figure'), [
+    Input('salaire-de-base', 'value'),
+    Input('chart-options', 'values'),
+])
+def update_waterfall(salaire_de_base, chart_options):
     index = value_to_index(MIN, STEP, salaire_de_base)
-    return create_waterfall_figure(keep_index(index, waterfall_columns))
+    return create_waterfall_figure(
+        bars=keep_index(index, waterfall_columns),
+        include_sub_totals='display-sub-totals' in chart_options,
+    )

@@ -25,12 +25,17 @@ from toolz import assoc, concat, concatv, dissoc, get, merge, pipe, update_in
 from toolz.curried import filter, map
 
 
-def create_waterfall_figure(bars):
+def create_waterfall_figure(bars, include_sub_totals):
+    def is_displayed(bar):
+        return bar["code"] == "revenu_disponible" or include_sub_totals or bar["bar_type"] != "sub_total"
+
+    displayed_bars = list(filter(is_displayed, bars))
+
     data = [
         go.Bar(
-            x=[bar.get("short_name") or bar["name"] for bar in bars],
-            y=[bar["value"] for bar in bars],
-            base=[bar["base"] for bar in bars],
+            x=[bar.get("short_name") or bar["name"] for bar in displayed_bars],
+            y=[bar["value"] for bar in displayed_bars],
+            base=[bar["base"] for bar in displayed_bars],
             marker=dict(
                 color=[
                     'rgba(55, 128, 191, 0.7)'
@@ -38,7 +43,7 @@ def create_waterfall_figure(bars):
                     else 'rgba(219, 64, 82, 0.7)'
                     if bar["value"] < 0
                     else 'rgba(50, 171, 96, 0.7)'
-                    for bar in bars
+                    for bar in displayed_bars
                 ],
                 line=dict(
                     color=[
@@ -47,7 +52,7 @@ def create_waterfall_figure(bars):
                         else 'rgba(219, 64, 82, 1.0)'
                         if bar["value"] < 0
                         else 'rgba(50, 171, 96, 1.0)'
-                        for bar in bars
+                        for bar in displayed_bars
                     ],
                     width=2,
                 )
@@ -56,7 +61,7 @@ def create_waterfall_figure(bars):
     ]
 
     layout = go.Layout(
-        title=bars[-1]["name"],
+        title=displayed_bars[-1]["name"],
         barmode='stack',
         paper_bgcolor='rgba(245, 246, 249, 1)',
         plot_bgcolor='rgba(245, 246, 249, 1)',
