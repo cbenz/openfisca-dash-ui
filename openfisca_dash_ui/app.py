@@ -104,13 +104,16 @@ def precalculate_decomposition_json(tbs):
     return filled_decomposition_json
 
 
-# print("Initializing France tax and benefit system...")
-# tbs = FranceTaxBenefitSystem()
-# print("Pre-calculating waterfall data...")
-# decomposition_json = precalculate_decomposition_json(tbs)
-
-with Path("decomposition.json").open() as fd:
-    decomposition_json = json.load(fd)
+decomposition_file_path = Path("decomposition.json")
+if decomposition_file_path.is_file():
+    print("Loading decomposition from file...")
+    with decomposition_file_path.open() as fd:
+        decomposition_json = json.load(fd)
+else:
+    print("Initializing France tax and benefit system...")
+    tbs = FranceTaxBenefitSystem()
+    print("Pre-calculating decomposition...")
+    decomposition_json = precalculate_decomposition_json(tbs)
 
 waterfall_columns = decomposition_to_waterfall(decomposition_json)
 
