@@ -25,9 +25,9 @@ from toolz import assoc, concat, concatv, dissoc, get, merge, pipe, update_in
 from toolz.curried import filter, map
 
 
-def create_waterfall_figure(bars, include_sub_totals):
+def create_waterfall_figure(bars, display_sub_totals):
     def is_displayed(bar):
-        return bar["code"] == "revenu_disponible" or include_sub_totals or bar["bar_type"] != "sub_total"
+        return bar["code"] == "revenu_disponible" or display_sub_totals or bar["bar_type"] != "sub_total"
 
     displayed_bars = list(filter(is_displayed, bars))
 
@@ -60,27 +60,45 @@ def create_waterfall_figure(bars, include_sub_totals):
         ),
     ]
 
+    # shapes = [
+    #     sub_total_rect(bar["start_child_index"], bar["end_child_index"])
+    #     for bar in bars
+    #     if bar["bar_type"] == "sub_total"
+    # ]
+
     layout = go.Layout(
         title=displayed_bars[-1]["name"],
         barmode='stack',
         paper_bgcolor='rgba(245, 246, 249, 1)',
         plot_bgcolor='rgba(245, 246, 249, 1)',
-        showlegend=False
+        showlegend=True,
+        # shapes=shapes,
     )
 
     fig = go.Figure(data=data, layout=layout)
     return fig
 
 
-def decomposition_to_waterfall(decomposition_json):
-    """Transform a decomposition tree to a list useful to render a waterfall chart.
+# def sub_total_rect(x0_bar_index, x1_bar_index):
+#     return {
+#         'type': 'rect',
+#         'xref': 'x',
+#         'yref': 'paper',
+#         'x0': x0_bar_index - 0.45,
+#         'y0': 0,
+#         'x1': x1_bar_index + 0.45,
+#         'y1': 1,
+#         'fillcolor': 'gray',
+#         'opacity': 0.2,
+#         'line': {
+#             'width': 0.5,
+#         }
+#     }
 
-    Compute sub-totals for tree nodes.
 
-    Tree leaves become "value" bars, and nodes become "sub_total" bars.
-    """
+def decomposition_to_waterfall_bars(decomposition_tree):
     def process_node(node):
-        nonlocal current_bases
+        nonlocal current_base
         children = node.get('children')
         if children:
             # Sub-total bar
@@ -88,21 +106,18 @@ def decomposition_to_waterfall(decomposition_json):
             if new_children:
                 return merge(node, {
                     'bar_type': 'sub_total',
-                    'bases': new_children[0]["bases"],
+                    'base': new_children[0]["base"],
                     'children': new_children,
-                    'values': sum_lists(child["values"] for child in new_children),
+                    'value': sum(child["value"] for child in new_children),
                 })
         else:
             # Value bar
-            if current_bases is None:
-                # Initialize current_bases according to the number of elements of the first processed leave of the tree.
-                current_bases = [0] * len(node["values"])
-            if any(node["values"]):
+            if node["value"]:
                 value_bar = merge(node, {
                     'bar_type': "value",
-                    'bases': current_bases,
+                    'base': current_base,
                 })
-                current_bases = sum_lists([current_bases, node["values"]])
+                current_base = current_base + node["value"]
                 return value_bar
 
         return None
@@ -110,47 +125,27 @@ def decomposition_to_waterfall(decomposition_json):
     def to_bars(node):
         children = node.get('children')
         if not children:
+
             return [node]
         new_children = concat(to_bars(child) for child in children)
         bar = dissoc(node, 'children')
         return list(concatv(new_children, [bar]))
 
-    current_bases = None
+    current_base = 0
 
-    return to_bars(process_node(decomposition_json))
-
-
-def keep_index(index, waterfall_columns):
-    return pipe(
-        waterfall_columns,
-        map(lambda col: update_in(col, ['bases'], lambda bases: get(index, bases, default=0))),
-        map(lambda col: update_in(col, ['values'], lambda values: get(index, values, default=0))),
-        map(rename_key('bases', 'base')),
-        map(rename_key('values', 'value')),
-        filter(lambda node: node["value"] != 0),
-        list,
-    )
+    return to_bars(process_node(decomposition_tree))
 
 
-def rename_key(old, new):
-    def rename_key_(d):
-        return dissoc(
-            assoc(d, new, d[old]),
-            old,
-        )
-    return rename_key_
+def keep_index(index, decomposition_tree):
+    """Return a `decomposition_tree` with one value per node."""
+    def process_node(node):
+        children = node.get('children')
+        if children:
+            new_children = [process_node(child) for child in children]
+            new_node = merge(node, {'children': new_children})
+        else:
+            new_node = merge(node, {'value': node['values'][index]})
+        new_node = dissoc(new_node, 'values')
+        return new_node
 
-
-def sum_lists(lists):
-    """Return a `list` containing the sum of given `lists`, element by element.
-
-    All the lists must be equal length.
-
-    >>> sum_lists([])
-    []
-    >>> sum_lists([[0, 5], [1, 6]])
-    [1, 11]
-    """
-    if not lists:
-        return lists
-    return reduce(lambda accu, l: list(map(operator.add, accu, l)), lists)
+    return process_node(decomposition_tree)

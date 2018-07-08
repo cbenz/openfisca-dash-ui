@@ -20,8 +20,45 @@
 from openfisca_dash_ui import waterfall
 
 
-def test_decomposition_to_waterfall():
-    assert waterfall.decomposition_to_waterfall({
+def test_decomposition_to_waterfall_bars():
+    assert waterfall.decomposition_to_waterfall_bars({
+        "code": "N1",
+        "children": [
+            {
+                "code": "N11",
+                "children": [
+                    {"code": "V111", "value": 1},
+                    {"code": "V112", "value": 2},
+                    {"code": "V113", "value": 0}
+                ]
+            },
+            {
+                "code": "N12",
+                "children": [
+                    {"code": "V121", "value": -1}
+                ]
+            },
+            {
+                "code": "N13",
+                "children": [
+                    {"code": "V131", "value": 0}
+                ]
+            },
+            {"code": "V12", "value": 7}
+        ]
+    }) == [
+        {'code': 'V111', 'bar_type': 'value', 'base': 0, 'value': 1},
+        {'code': 'V112', 'bar_type': 'value', 'base': 1, 'value': 2},
+        {'code': 'N11', 'bar_type': 'sub_total', 'base': 0, 'value': 3},
+        {'code': 'V121', 'bar_type': 'value', 'base': 3, 'value': -1},
+        {'code': 'N12', 'bar_type': 'sub_total', 'base': 3, 'value': -1},
+        {'code': 'V12', 'bar_type': 'value', 'base': 2, 'value': 7},
+        {'code': 'N1', 'bar_type': 'sub_total', 'base': 0, 'value': 9},
+    ]
+
+
+def test_keep_index():
+    assert waterfall.keep_index(0, {
         "code": "N1",
         "children": [
             {
@@ -46,12 +83,29 @@ def test_decomposition_to_waterfall():
             },
             {"code": "V12", "values": [7, 8, 9]}
         ]
-    }) == [
-        {'code': 'V111', 'bar_type': 'value', 'bases': [0, 0, 0], 'values': [1, 2, 3]},
-        {'code': 'V112', 'bar_type': 'value', 'bases': [1, 2, 3], 'values': [2, 3, 4]},
-        {'code': 'N11', 'bar_type': 'sub_total', 'bases': [0, 0, 0], 'values': [3, 5, 7]},
-        {'code': 'V121', 'bar_type': 'value', 'bases': [3, 5, 7], 'values': [-1, -1, -1]},
-        {'code': 'N12', 'bar_type': 'sub_total', 'bases': [3, 5, 7], 'values': [-1, -1, -1]},
-        {'code': 'V12', 'bar_type': 'value', 'bases': [2, 4, 6], 'values': [7, 8, 9]},
-        {'code': 'N1', 'bar_type': 'sub_total', 'bases': [0, 0, 0], 'values': [9, 12, 15]},
-    ]
+    }) == {
+        "code": "N1",
+        "children": [
+            {
+                "code": "N11",
+                "children": [
+                    {"code": "V111", "value": 1},
+                    {"code": "V112", "value": 2},
+                    {"code": "V113", "value": 0}
+                ]
+            },
+            {
+                "code": "N12",
+                "children": [
+                    {"code": "V121", "value": -1}
+                ]
+            },
+            {
+                "code": "N13",
+                "children": [
+                    {"code": "V131", "value": 0}
+                ]
+            },
+            {"code": "V12", "value": 7}
+        ]
+    }

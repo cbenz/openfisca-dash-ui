@@ -32,7 +32,7 @@ from dash.dependencies import Input, Output
 from openfisca_core import decompositions, periods
 from openfisca_france import FranceTaxBenefitSystem
 
-from .waterfall import create_waterfall_figure, decomposition_to_waterfall, keep_index
+from .waterfall import create_waterfall_figure, decomposition_to_waterfall_bars, keep_index
 
 log = logging.getLogger(__name__)
 logging.basicConfig(level=logging.DEBUG)
@@ -92,30 +92,29 @@ def precalculate_decomposition_json(tbs):
     simulation = scenario.new_simulation()
 
     decomposition_json = decompositions.get_decomposition_json(tbs)
-    filled_decomposition_json = decompositions.calculate([simulation], decomposition_json)
+    decomposition_tree = decompositions.calculate([simulation], decomposition_json)
 
     # def serialize(x):
     #     if isinstance(x, collections.Iterable):
     #         return list(x)
     #     return x
     # with Path("decomposition.json").open('w') as fd:
-    #     json.dump(filled_decomposition_json, fd, indent=2, default=serialize)
+    #     json.dump(decomposition_tree, fd, indent=2, default=serialize)
 
-    return filled_decomposition_json
+    return decomposition_tree
 
 
 decomposition_file_path = Path("decomposition.json")
 if decomposition_file_path.is_file():
     print("Loading decomposition from file...")
     with decomposition_file_path.open() as fd:
-        decomposition_json = json.load(fd)
+        decomposition_tree = json.load(fd)
 else:
     print("Initializing France tax and benefit system...")
     tbs = FranceTaxBenefitSystem()
     print("Pre-calculating decomposition...")
-    decomposition_json = precalculate_decomposition_json(tbs)
+    decomposition_tree = precalculate_decomposition_json(tbs)
 
-waterfall_columns = decomposition_to_waterfall(decomposition_json)
 
 app = dash.Dash()
 server = app.server  # Referenced by Procfile
@@ -158,6 +157,6 @@ def display_salaire_de_base(salaire_de_base):
 def update_waterfall(salaire_de_base, chart_options):
     index = value_to_index(MIN, STEP, salaire_de_base)
     return create_waterfall_figure(
-        bars=keep_index(index, waterfall_columns),
-        include_sub_totals='display-sub-totals' in chart_options,
+        bars=decomposition_to_waterfall_bars(keep_index(index, decomposition_tree)),
+        display_sub_totals='display-sub-totals' in chart_options,
     )
