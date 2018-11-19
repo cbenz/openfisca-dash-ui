@@ -20,4 +20,4 @@
 from openfisca_dash_ui.app import app
 
 if __name__ == '__main__':
-    app.run_server(debug=True, port=7777)
+    app.run_server(debug=True, host="0.0.0.0", port=7777)

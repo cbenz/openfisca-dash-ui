@@ -1,0 +1,75 @@
+- code: revenu_disponible
+  name: Rev. disp.
+  children:
+  - code: revenus_nets_du_travail
+    name: Revenus nets
+    children:
+    - code: salaire_net
+      name: Salaire net
+      children:
+      - code: salaire_imposable
+        name: Salaire imposable
+        children:
+        - code: salaire_de_base
+          name: Salaire brut
+          children:
+          - code: salaire_super_brut_hors_allegements
+            name: Salaire super brut HA
+            children:
+            - code: salaire_super_brut
+              name: Salaire super brut
+              children:
+              - code: cout_du_travail
+                name: Coût du travail
+                children: []
+              - code: credit_impot_competitivite_emploi
+                name: CICE
+                children: []
+              - code: aide_premier_salarie
+                name: Aide premier salarié
+                children: []
+              - code: aide_embauche_pme
+                name: Aide PME
+                children: []
+              - code: tehr
+                name: Taxe exceptionnelle
+                children: []
+            - code: allegement_fillon
+              name: Fillon
+              children: []
+          - code: cotisations_employeur
+            name: Cotisations employeur
+            children: []
+        - code: cotisations_salariales
+          name: Cotisations salariales
+          children: []
+        - code: csg_deductible_salaire
+          name: CSG déductible
+          children: []
+      - code: csg_imposable_salaire
+        name: CSG imposable
+        children: []
+      - code: crds_salaire
+        name: CRDS
+        children: []
+  - code: prestations_sociales
+    name: Prestations sociales
+    children:
+    - code: minima_sociaux
+      name: Minima sociaux
+      children:
+      - code: rsa
+        name: RSA
+        children: []
+      - code: ppa
+        name: PPA
+        children: []
+  - code: ppe
+    name: PPE
+    children: []
+  - code: impots_directs
+    name: Impôts directs
+    children:
+    - code: irpp
+      name: Impôt sur le revenu
+      children: []

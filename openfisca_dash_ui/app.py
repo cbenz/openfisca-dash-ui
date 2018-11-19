@@ -24,6 +24,7 @@ import collections
 import json
 import logging
 from pathlib import Path
+from ruamel.yaml import YAML
 
 import dash
 import dash_core_components as dcc
@@ -65,7 +66,13 @@ STEP = count_to_step(MIN, MAX, COUNT)
 INITIAL_VALUE = 0
 
 
-def precalculate_decomposition_json(tbs):
+def calculate(simulation, tree):
+    for node in tree:
+        array = simulation.calculate_add(node['code'], simulation.period)
+        node['values'] = array.tolist()
+        calculate(simulation, node['children'])
+
+def precalculate_decomposition(tbs):
     period = 2018
 
     scenario_params = {
@@ -91,8 +98,10 @@ def precalculate_decomposition_json(tbs):
     scenario = tbs.new_scenario().init_single_entity(**scenario_params)
     simulation = scenario.new_simulation()
 
-    decomposition_json = decompositions.get_decomposition_json(tbs)
-    decomposition_tree = decompositions.calculate([simulation], decomposition_json)
+    path = Path('openfisca_dash_ui/decomposition.yaml')
+    yaml = YAML(typ='safe')
+    decomposition = yaml.load(path)
+    calculate(simulation, decomposition)
 
     # def serialize(x):
     #     if isinstance(x, collections.Iterable):
@@ -101,7 +110,7 @@ def precalculate_decomposition_json(tbs):
     # with Path("decomposition.json").open('w') as fd:
     #     json.dump(decomposition_tree, fd, indent=2, default=serialize)
 
-    return decomposition_tree
+    return decomposition
 
 
 decomposition_file_path = Path("decomposition.json")
@@ -113,7 +122,7 @@ else:
     print("Initializing France tax and benefit system...")
     tbs = FranceTaxBenefitSystem()
     print("Pre-calculating decomposition...")
-    decomposition_tree = precalculate_decomposition_json(tbs)
+    decomposition_tree = precalculate_decomposition(tbs)
 
 
 app = dash.Dash()
@@ -157,6 +166,6 @@ def display_salaire_de_base(salaire_de_base):
 def update_waterfall(salaire_de_base, chart_options):
     index = value_to_index(MIN, STEP, salaire_de_base)
     return create_waterfall_figure(
-        bars=decomposition_to_waterfall_bars(keep_index(index, decomposition_tree)),
+        bars=decomposition_to_waterfall_bars(keep_index(index, decomposition_tree[0])),
         display_sub_totals='display-sub-totals' in chart_options,
     )

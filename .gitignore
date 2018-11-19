@@ -2,3 +2,5 @@
 .ipynb_checkpoints
 .eggs
 OpenFisca_Dash_UI.egg-info
+__pycache__
+*.pyc
