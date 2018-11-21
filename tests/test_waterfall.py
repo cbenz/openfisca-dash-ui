@@ -17,7 +17,22 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+from pathlib import Path
+from ruamel.yaml import YAML
+
+from openfisca_france import FranceTaxBenefitSystem
 from openfisca_dash_ui import waterfall
+
+
+def test_decomposition_variables():
+    tbs = FranceTaxBenefitSystem()
+    path = Path('openfisca_dash_ui/decomposition.yaml')
+    yaml = YAML(typ='safe')
+    decomposition = yaml.load(path)
+    def check(tree):
+        for node in tree:
+            assert node['code'] in tbs.variables
+            check(node['children'])
 
 
 def test_decomposition_to_waterfall_bars():

@@ -88,7 +88,8 @@ setup(
         'dash-renderer',
         'plotly',
         'gunicorn',
-        'OpenFisca-France >= 21.0, < 22.0',
+        'ruamel.yaml',
+        'OpenFisca-France >= 21.0, < 30.0',
         'toolz >= 0.9, < 0.10',
     ],
 

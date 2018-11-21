@@ -110,9 +110,8 @@ def decomposition_to_waterfall_bars(decomposition_tree):
                     'children': new_children,
                     'value': sum(child["value"] for child in new_children),
                 })
-        else:
-            # Value bar
-            if node["value"]:
+        elif node["value"]:
+                # Value bar
                 value_bar = merge(node, {
                     'bar_type': "value",
                     'base': current_base,
@@ -120,12 +119,12 @@ def decomposition_to_waterfall_bars(decomposition_tree):
                 current_base = current_base + node["value"]
                 return value_bar
 
+        # Leaf node with value of 0, skip
         return None
 
     def to_bars(node):
         children = node.get('children')
         if not children:
-
             return [node]
         new_children = concat(to_bars(child) for child in children)
         bar = dissoc(node, 'children')
