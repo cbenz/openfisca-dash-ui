@@ -11,6 +11,7 @@ https://openfisca-dash-ui.herokuapp.com/
 ```bash
 mkvirtualenv openfisca-dash-ui
 pip install -r requirements.txt
+pip install -e .
 ```
 
 ## Start server
