@@ -24,12 +24,12 @@ import collections
 import json
 import logging
 from pathlib import Path
-from ruamel.yaml import YAML
 
 import dash
 import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output
+from ruamel.yaml import YAML
 from openfisca_core import decompositions, periods
 from openfisca_france import FranceTaxBenefitSystem
 
@@ -66,11 +66,15 @@ STEP = count_to_step(MIN, MAX, COUNT)
 INITIAL_VALUE = 0
 
 
-def calculate(simulation, tree):
+def calculate_decomposition(simulation, period, tree):
+    """Mutate `tree` by computing the output variables represented by its notes."""
     for node in tree:
-        array = simulation.calculate_add(node['code'], simulation.period)
+        array = simulation.calculate_add(node['code'], period)
         node['values'] = array.tolist()
-        calculate(simulation, node['children'])
+        children = node.get("children")
+        if children:
+            calculate_decomposition(simulation, period, children)
+
 
 def precalculate_decomposition(tbs):
     period = 2018

@@ -21,37 +21,26 @@
               children:
               - code: cout_du_travail
                 name: Coût du travail
-                children: []
               - code: credit_impot_competitivite_emploi
                 name: CICE
-                children: []
               - code: aide_premier_salarie
                 name: Aide premier salarié
-                children: []
               - code: aide_embauche_pme
                 name: Aide PME
-                children: []
               - code: tehr
                 name: Taxe exceptionnelle
-                children: []
             - code: allegement_fillon
               name: Fillon
-              children: []
           - code: cotisations_employeur
             name: Cotisations employeur
-            children: []
         - code: cotisations_salariales
           name: Cotisations salariales
-          children: []
         - code: csg_deductible_salaire
           name: CSG déductible
-          children: []
       - code: csg_imposable_salaire
         name: CSG imposable
-        children: []
       - code: crds_salaire
         name: CRDS
-        children: []
   - code: prestations_sociales
     name: Prestations sociales
     children:
@@ -60,16 +49,12 @@
       children:
       - code: rsa
         name: RSA
-        children: []
       - code: ppa
         name: PPA
-        children: []
   - code: ppe
     name: PPE
-    children: []
   - code: impots_directs
     name: Impôts directs
     children:
     - code: irpp
       name: Impôt sur le revenu
-      children: []
