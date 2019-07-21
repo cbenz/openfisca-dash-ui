@@ -25,7 +25,7 @@ Project properties and packaging infos.
 import codecs
 from os import path
 
-from setuptools import setup, find_packages
+from setuptools import find_packages, setup
 
 HERE = path.abspath(path.dirname(__file__))
 
@@ -89,7 +89,7 @@ setup(
         'plotly',
         'gunicorn',
         'ruamel.yaml',
-        'OpenFisca-France >= 21.0, < 30.0',
+        'OpenFisca-France >= 48.2, < 49.0',
         'toolz >= 0.9, < 0.10',
     ],
 

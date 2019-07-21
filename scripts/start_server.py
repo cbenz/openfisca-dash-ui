@@ -17,7 +17,9 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+
 from openfisca_dash_ui.app import app
 
 if __name__ == '__main__':
+    # The code reload starts the server twice. Use `use_reloader=False` or `debug=False` to disable it.
     app.run_server(debug=True, host="0.0.0.0", port=7777)
