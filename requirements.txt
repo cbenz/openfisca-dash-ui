@@ -5,7 +5,7 @@ autopep8==1.4.4
 Babel==2.7.0
 backcall==0.1.0
 Biryani==0.10.8
-bleach==3.1.0
+bleach==3.1.4
 certifi==2019.6.16
 chardet==3.0.4
 Click==7.0
